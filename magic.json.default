@@ -1,0 +1,7 @@
+{
+  "ffmpeg" : "/usr/bin/ffmpeg",
+
+  "app_secret" : "your_secret",
+  "app_id" : "your_id",
+  "user_auth_token" : "your_token"
+}

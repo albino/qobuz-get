@@ -103,14 +103,17 @@ int main(string[] args)
     choice = readln().chomp;
   }
   if (choice == "y") {
-    auto full = execute([magic["sox"].str, dirName~"/01 "~tracks[0]["title"].str~".flac", "-n", "remix", "1", "spectrogram",
-        "-x", "3000", "-y", "513", "-z", "120", "-w", "Kaiser", "-o", "SpecFull.png"]);
-    auto zoom = execute([magic["sox"].str, dirName~"/01 "~tracks[0]["title"].str~".flac", "-n", "remix", "1", "spectrogram",
-        "-X", "500", "-y", "1025", "-z", "120", "-w", "Kaiser", "-S", "0:30", "-d", "0:04", "-o", "SpecZoom.png"]);
-    if (full.status != 0 || zoom.status != 0)
-      writeln("Generating spectrals failed! Is sox configured properly?");
-    else 
+    try {
+      auto full = execute([magic["sox"].str, dirName~"/01 "~tracks[0]["title"].str~".flac", "-n", "remix", "1", "spectrogram",
+          "-x", "3000", "-y", "513", "-z", "120", "-w", "Kaiser", "-o", "SpecFull.png"]);
+      auto zoom = execute([magic["sox"].str, dirName~"/01 "~tracks[0]["title"].str~".flac", "-n", "remix", "1", "spectrogram",
+          "-X", "500", "-y", "1025", "-z", "120", "-w", "Kaiser", "-S", "0:30", "-d", "0:04", "-o", "SpecZoom.png"]);
+      if (full.status != 0 || zoom.status != 0)
+        throw new Exception();
       writeln("SpecFull.png and SpecZoom.png written.");
+    } catch (Exception e) {
+      writeln("Generating spectrals failed! Is sox configured properly?");
+    }
   }
 
   choice = null;
@@ -124,11 +127,14 @@ int main(string[] args)
     stdout.flush;
     string announce = readln().chomp;
 
+    try {
     auto t = execute([magic["mktorrent"].str, "-l", "20", "-a", announce, dirName]);
     if (t.status != 0)
+      throw new Exception();
+    writeln("'"~dirName~".torrent' created.");
+    } catch (Exception e) {
       writeln("Creating .torrent file failed! Is mktorrent configured properly?");
-    else
-      writeln("'"~dirName~".torrent' created.");
+    }
   }
 
   writeln("All done, exiting.");

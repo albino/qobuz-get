@@ -16,6 +16,10 @@ It should be easy to build qobuz-get on any platform supported by a D compiler. 
 
 ## Troubleshooting
 
+### `No such file or directory` when trying to run qobuz-get
+
+Some Linux distros might not have `/lib/ld-linux-x86-64.so.2`. If this is the case with yours, try `ln -s /lib64/ld-linux-x86-64.so.2 /lib/ld-linux-x86-64.so.2`, it's a bit of a hack but it works.
+
 ### FFmpeg fails!
 
 On Linux, try using the statically linked ffmpeg binary provided [here](https://shell.cyberia.is/~albino/ffmpeg).

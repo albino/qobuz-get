@@ -3,6 +3,8 @@ import qobuz.api;
 
 int main(string[] args)
 {
+  string VERSION = "1.0";
+
   if (args.length != 2) {
     writefln("Usage: %s <album id or url>", args[0]);
     return -1;
@@ -49,7 +51,12 @@ int main(string[] args)
   }
 
   string dirName = artist~" - "~title~" ("~year~") [WEB FLAC]";
-  mkdir(dirName);
+  try {
+    mkdir(dirName);
+  } catch (Exception e) {
+    writeln("Could not create directory: `"~dirName~"`. Does it exist already?");
+    return -9;
+  }
 
   foreach (i, track; tracks) {
     auto num = (i+1).text;
@@ -67,9 +74,9 @@ int main(string[] args)
     }
 
     try {
-      auto pipes = pipeProcess([magic["ffmpeg"].str, "-i", "-", "-metadata", "title="~trackName, "-metadata", "author="~artist,
+      auto pipes = pipeProcess([magic["ffmpeg"].str, "-i", "-", "-metadata", "title="~trackName, "-metadata", "artist="~artist,
           "-metadata", "album="~title, "-metadata", "year="~year, "-metadata", "track="~num, "-metadata", "genre="~genre,
-          dirName~"/"~num~" "~trackName~".flac"], Redirect.stdin | Redirect.stderr | Redirect.stdout);
+          "-metadata", "comment=qobuz-get "~VERSION, dirName~"/"~num~" "~trackName~".flac"], Redirect.stdin | Redirect.stderr | Redirect.stdout);
       foreach (chunk; byChunkAsync(url, 1024)) {
         pipes.stdin.rawWrite(chunk);
         pipes.stdin.flush;
@@ -82,6 +89,12 @@ int main(string[] args)
     }
     writeln("Done!");
   }
+
+  // Get album art
+  write("Getting album art... ");
+  stdout.flush;
+  download(id.getArtUrl, dirName~"/cover.jpg");
+  writeln("Done!");
 
   return 0;
 }

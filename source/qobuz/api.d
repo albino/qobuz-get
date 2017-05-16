@@ -80,3 +80,14 @@ string getDownloadUrl(JSONValue magic, string id) {
 
   assert(0);
 }
+
+string getArtUrl(string id) {
+  if (id.length != 13) {
+    writeln("Album ID of invalid length given!");
+    exit(-10);
+  }
+
+  string a = id[11..13];
+  string b = id[9..11];
+  return "http://static.qobuz.com/images/covers/"~a~"/"~b~"/"~id~"_max.jpg";
+}

@@ -11,7 +11,7 @@ int main(string[] args)
   }
 
   auto path = thisExePath();
-  path = path.replaceFirst(regex("qobuz-get$"), "magic.json"); // HACK
+  path = path.replaceFirst(regex("qobuz-get(\\.exe)?$"), "magic.json"); // HACK
   string json;
   try {
     json = readText(path);

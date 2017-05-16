@@ -18,7 +18,7 @@ It should be easy to build qobuz-get on any platform supported by a D compiler. 
 
 ### FFmpeg fails!
 
-On Linux, try using the statically linked ffmpeg binary provided here.
+On Linux, try using the statically linked ffmpeg binary provided [here](https://shell.cyberia.is/~albino/ffmpeg).
 
 ### Sox fails!
 

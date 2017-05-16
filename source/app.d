@@ -3,7 +3,7 @@ import qobuz.api;
 
 int main(string[] args)
 {
-  string VERSION = "1.0";
+  string VERSION = "1.1";
 
   if (args.length != 2) {
     writefln("Usage: %s <album id or url>", args[0]);

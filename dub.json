@@ -8,5 +8,5 @@
         ],
 	"description": "Tool to download albums from Qobuz.",
 	"copyright": "Copyright (C) 2017, Al Beano",
-	"license": "GPLv2"
+	"license": "GPLv2 or later"
 }

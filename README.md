@@ -4,7 +4,7 @@ Tool to download FLACs from qobuz.com.
 
 ## Setup
 
-Statically linked 64-bit Linux and Windows binaries are available in the (Releases)[https://git.fuwafuwa.moe/albino/qobuz-get/releases] tab. On Linux, you should install sox, ffmpeg and mktorrent with your package manager, and insert the paths to the binaries (found using `which sox`, `which ffmpeg`, etc...) into magic.json.
+Statically linked 64-bit Linux and Windows binaries are available in the [Releases](https://git.fuwafuwa.moe/albino/qobuz-get/releases) tab. On Linux, you should install sox, ffmpeg and mktorrent with your package manager, and insert the paths to the binaries (found using `which sox`, `which ffmpeg`, etc...) into magic.json.
 
 There are three other values which must be inserted into magic.json. `app_id` and `app_secret` are listed on [this page](http://shell.cyberia.is/~albino/qobuz-creds.html). `user_auth_token` is specific to your qobuz account. See the bottom of this README for instructions on finding it. These values could change from time to time, so if qobuz-get stops working suddenly, you probably need to get new ones.
 

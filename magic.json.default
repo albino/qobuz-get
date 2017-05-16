@@ -1,5 +1,6 @@
 {
   "ffmpeg" : "/usr/bin/ffmpeg",
+  "sox" : "/usr/bin/sox",
 
   "app_secret" : "your_secret",
   "app_id" : "your_id",

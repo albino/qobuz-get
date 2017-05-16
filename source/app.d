@@ -1,4 +1,4 @@
-import std.stdio, std.regex, std.json, std.file, std.datetime, std.conv, std.process, std.net.curl;
+import std.stdio, std.regex, std.json, std.file, std.datetime, std.conv, std.process, std.net.curl, std.string;
 import qobuz.api;
 
 int main(string[] args)
@@ -95,6 +95,25 @@ int main(string[] args)
   stdout.flush;
   download(id.getArtUrl, dirName~"/cover.jpg");
   writeln("Done!");
+
+  string choice;
+  while (choice != "n" && choice != "y") {
+    write("Generate spectrals? [y/n] ");
+    choice = readln().chomp;
+  }
+  if (choice == "y") {
+    auto full = execute([magic["sox"].str, dirName~"/01 "~tracks[0]["title"].str~".flac", "-n", "remix", "1", "spectrogram",
+        "-x", "3000", "-y", "513", "-z", "120", "-w", "Kaiser", "-o", "SpecFull.png"]);
+    auto zoom = execute([magic["sox"].str, dirName~"/01 "~tracks[0]["title"].str~".flac", "-n", "remix", "1", "spectrogram",
+        "-X", "500", "-y", "1025", "-z", "120", "-w", "Kaiser", "-S", "0:30", "-d", "0:04", "-o", "SpecZoom.png"]);
+    if (full.status != 0 || zoom.status != 0) {
+      writeln("Generating spectrals failed! Is sox configured properly?");
+    } else {
+      writeln("SpecFull.png and SpecZoom.png written.");
+    }
+  }
+
+  writeln("All done, exiting.");
 
   return 0;
 }

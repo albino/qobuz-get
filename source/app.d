@@ -99,6 +99,7 @@ int main(string[] args)
   string choice;
   while (choice != "n" && choice != "y") {
     write("Generate spectrals? [y/n] ");
+    stdout.flush;
     choice = readln().chomp;
   }
   if (choice == "y") {
@@ -106,11 +107,28 @@ int main(string[] args)
         "-x", "3000", "-y", "513", "-z", "120", "-w", "Kaiser", "-o", "SpecFull.png"]);
     auto zoom = execute([magic["sox"].str, dirName~"/01 "~tracks[0]["title"].str~".flac", "-n", "remix", "1", "spectrogram",
         "-X", "500", "-y", "1025", "-z", "120", "-w", "Kaiser", "-S", "0:30", "-d", "0:04", "-o", "SpecZoom.png"]);
-    if (full.status != 0 || zoom.status != 0) {
+    if (full.status != 0 || zoom.status != 0)
       writeln("Generating spectrals failed! Is sox configured properly?");
-    } else {
+    else 
       writeln("SpecFull.png and SpecZoom.png written.");
-    }
+  }
+
+  choice = null;
+  while (choice != "n" && choice != "y") {
+    write("Create .torrent file? [y/n] ");
+    stdout.flush;
+    choice = readln().chomp;
+  }
+  if (choice == "y") {
+    write("Announce URL: ");
+    stdout.flush;
+    string announce = readln().chomp;
+
+    auto t = execute([magic["mktorrent"].str, "-l", "20", "-a", announce, dirName]);
+    if (t.status != 0)
+      writeln("Creating .torrent file failed! Is mktorrent configured properly?");
+    else
+      writeln("'"~dirName~".torrent' created.");
   }
 
   writeln("All done, exiting.");

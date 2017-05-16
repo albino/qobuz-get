@@ -1,6 +1,7 @@
 {
   "ffmpeg" : "/usr/bin/ffmpeg",
   "sox" : "/usr/bin/sox",
+  "mktorrent" : "/usr/bin/mktorrent",
 
   "app_secret" : "your_secret",
   "app_id" : "your_id",

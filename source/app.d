@@ -109,7 +109,7 @@ int main(string[] args)
       auto zoom = execute([magic["sox"].str, dirName~"/01 "~tracks[0]["title"].str~".flac", "-n", "remix", "1", "spectrogram",
           "-X", "500", "-y", "1025", "-z", "120", "-w", "Kaiser", "-S", "0:30", "-d", "0:04", "-o", "SpecZoom.png"]);
       if (full.status != 0 || zoom.status != 0)
-        throw new Exception();
+        throw new Exception("mktorrent failed");
       writeln("SpecFull.png and SpecZoom.png written.");
     } catch (Exception e) {
       writeln("Generating spectrals failed! Is sox configured properly?");
@@ -130,7 +130,7 @@ int main(string[] args)
     try {
     auto t = execute([magic["mktorrent"].str, "-l", "20", "-a", announce, dirName]);
     if (t.status != 0)
-      throw new Exception();
+      throw new Exception("mktorrent failed");
     writeln("'"~dirName~".torrent' created.");
     } catch (Exception e) {
       writeln("Creating .torrent file failed! Is mktorrent configured properly?");

@@ -3,7 +3,7 @@ import qobuz.api;
 
 int main(string[] args)
 {
-  string VERSION = "1.1";
+  string VERSION = "1.2";
 
   if (args.length != 2) {
     writefln("Usage: %s <album id or url>", args[0]);
@@ -38,7 +38,7 @@ int main(string[] args)
   try {
     title = album["title"].str;
     artist = album["artist"]["name"].str;
-    genre = album["genres_list"][0].str;
+    genre = album["genre"]["name"].str;
     auto releaseTime = SysTime.fromUnixTime(album["released_at"].integer, UTC());
     year = releaseTime.year.text;
 
@@ -58,14 +58,18 @@ int main(string[] args)
     return -9;
   }
 
-  foreach (i, track; tracks) {
-    auto num = (i+1).text;
-    string url, trackName;
+  auto discs = tracks[tracks.length - 1]["media_number"].integer;
+
+  foreach (track; tracks) {
+    string url, num, discNum, trackName, trackArtist;
     try {
+      num = track["track_number"].integer.text;
+      discNum = track["media_number"].integer.text;
       trackName = track["title"].str;
+      trackArtist = track["performer"]["name"].str;
       if (num.length < 2)
         num = "0"~num;
-      writef(" [%s] %s... ", num, trackName);
+      writef(" [%s/%s] %s... ", discNum, num, trackName);
       stdout.flush;
       url = getDownloadUrl(magic, track["id"].integer.text);
     } catch (Exception e) {
@@ -73,10 +77,27 @@ int main(string[] args)
       return -7;
     }
 
+    string discDir;
+    if (discs > 1)
+      discDir = dirName~"/Disc "~discNum;
+    else
+      discDir = dirName;
+
+    if (!discDir.exists || !discDir.isDir) {
+      try {
+        mkdir(discDir);
+      } catch (Exception e) {
+        writeln("Failed to create directory `"~discDir~"`.");
+        return -11;
+      }
+    }
+
     try {
-      auto pipes = pipeProcess([magic["ffmpeg"].str, "-i", "-", "-metadata", "title="~trackName, "-metadata", "artist="~artist,
+      auto pipes = pipeProcess([magic["ffmpeg"].str, "-i", "-", "-metadata", "title="~trackName, "-metadata", "artist="~trackArtist,
           "-metadata", "album="~title, "-metadata", "year="~year, "-metadata", "track="~num, "-metadata", "genre="~genre,
-          "-metadata", "comment=qobuz-get "~VERSION, dirName~"/"~num~" "~trackName~".flac"], Redirect.stdin | Redirect.stderr | Redirect.stdout);
+          "-metadata", "albumartist="~artist, "-metadata", "discnumber="~discNum, "-metadata", "tracktotal="~tracks.length.text,
+          "-metadata", "disctotal="~discs.text, discDir~"/"~num~" - "~trackName~".flac"],
+          Redirect.stdin | Redirect.stderr | Redirect.stdout);
       foreach (chunk; byChunkAsync(url, 1024)) {
         pipes.stdin.rawWrite(chunk);
         pipes.stdin.flush;
@@ -90,10 +111,19 @@ int main(string[] args)
     writeln("Done!");
   }
 
+  string firstDisc;
+  if (discs > 1)
+    firstDisc = dirName~"/Disc 1";
+  else
+    firstDisc = dirName;
+
   // Get album art
   write("Getting album art... ");
   stdout.flush;
-  download(id.getArtUrl, dirName~"/cover.jpg");
+  download(id.getArtUrl, firstDisc~"/cover.jpg");
+  for (int i = 2; i <= discs; i++) {
+    copy(firstDisc~"/cover.jpg", dirName~"/Disc "~i.text~"/cover.jpg");
+  }
   writeln("Done!");
 
   string choice;
@@ -104,12 +134,12 @@ int main(string[] args)
   }
   if (choice == "y") {
     try {
-      auto full = execute([magic["sox"].str, dirName~"/01 "~tracks[0]["title"].str~".flac", "-n", "remix", "1", "spectrogram",
+      auto full = execute([magic["sox"].str, firstDisc~"/01 - "~tracks[0]["title"].str~".flac", "-n", "remix", "1", "spectrogram",
           "-x", "3000", "-y", "513", "-z", "120", "-w", "Kaiser", "-o", "SpecFull.png"]);
-      auto zoom = execute([magic["sox"].str, dirName~"/01 "~tracks[0]["title"].str~".flac", "-n", "remix", "1", "spectrogram",
+      auto zoom = execute([magic["sox"].str, firstDisc~"/01 - "~tracks[0]["title"].str~".flac", "-n", "remix", "1", "spectrogram",
           "-X", "500", "-y", "1025", "-z", "120", "-w", "Kaiser", "-S", "0:30", "-d", "0:04", "-o", "SpecZoom.png"]);
       if (full.status != 0 || zoom.status != 0)
-        throw new Exception("mktorrent failed");
+        throw new Exception("sox failed");
       writeln("SpecFull.png and SpecZoom.png written.");
     } catch (Exception e) {
       writeln("Generating spectrals failed! Is sox configured properly?");

@@ -51,6 +51,11 @@ int main(string[] args)
   }
 
   string dirName = artist~" - "~title~" ("~year~") [WEB FLAC]";
+
+  version (Windows) {
+    dirName = dirName.replaceAll(regex("[\\?<>:\"/\\\\|\\*]"), "");
+  }
+
   try {
     mkdir(dirName);
   } catch (Exception e) {
@@ -93,10 +98,14 @@ int main(string[] args)
     }
 
     try {
+      auto fileName = trackName;
+      version (Windows) {
+        fileName = fileName.replaceAll(regex("[\\?<>:\"/\\\\|\\*]"), "");
+      }
       auto pipes = pipeProcess([magic["ffmpeg"].str, "-i", "-", "-metadata", "title="~trackName, "-metadata", "artist="~trackArtist,
           "-metadata", "album="~title, "-metadata", "year="~year, "-metadata", "track="~num, "-metadata", "genre="~genre,
           "-metadata", "albumartist="~artist, "-metadata", "discnumber="~discNum, "-metadata", "tracktotal="~tracks.length.text,
-          "-metadata", "disctotal="~discs.text, discDir~"/"~num~" - "~trackName~".flac"],
+          "-metadata", "disctotal="~discs.text, discDir~"/"~num~" - "~fileName~".flac"],
           Redirect.stdin | Redirect.stderr | Redirect.stdout);
       foreach (chunk; byChunkAsync(url, 1024)) {
         pipes.stdin.rawWrite(chunk);
@@ -134,9 +143,14 @@ int main(string[] args)
   }
   if (choice == "y") {
     try {
-      auto full = execute([magic["sox"].str, firstDisc~"/01 - "~tracks[0]["title"].str~".flac", "-n", "remix", "1", "spectrogram",
+      auto trackName = tracks[0]["title"].str;
+      version (Windows) {
+        trackName = trackName.replaceAll(regex("[\\?<>:\"/\\\\|\\*]"), "");
+      }
+
+      auto full = execute([magic["sox"].str, firstDisc~"/01 - "~trackName~".flac", "-n", "remix", "1", "spectrogram",
           "-x", "3000", "-y", "513", "-z", "120", "-w", "Kaiser", "-o", "SpecFull.png"]);
-      auto zoom = execute([magic["sox"].str, firstDisc~"/01 - "~tracks[0]["title"].str~".flac", "-n", "remix", "1", "spectrogram",
+      auto zoom = execute([magic["sox"].str, firstDisc~"/01 - "~trackName~".flac", "-n", "remix", "1", "spectrogram",
           "-X", "500", "-y", "1025", "-z", "120", "-w", "Kaiser", "-S", "0:30", "-d", "0:04", "-o", "SpecZoom.png"]);
       if (full.status != 0 || zoom.status != 0)
         throw new Exception("sox failed");

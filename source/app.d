@@ -104,7 +104,7 @@ int main(string[] args)
       auto fileName = trackName;
       fileName = fileName.replaceAll(regex("[\\?<>:\"/\\\\|\\*]"), "");
       auto pipes = pipeProcess([magic["ffmpeg"].str, "-i", "-", "-metadata", "title="~trackName, "-metadata", "artist="~trackArtist,
-          "-metadata", "album="~title, "-metadata", "year="~year, "-metadata", "track="~num, "-metadata", "genre="~genre,
+          "-metadata", "album="~title, "-metadata", "date="~year, "-metadata", "track="~num, "-metadata", "genre="~genre,
           "-metadata", "albumartist="~artist, "-metadata", "discnumber="~discNum, "-metadata", "tracktotal="~tracks.length.text,
           "-metadata", "disctotal="~discs.text, discDir~"/"~num~" - "~fileName~".flac"],
           Redirect.stdin | Redirect.stderr | Redirect.stdout);

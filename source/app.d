@@ -51,10 +51,7 @@ int main(string[] args)
   }
 
   string dirName = artist~" - "~title~" ("~year~") [WEB FLAC]";
-
-  version (Windows) {
-    dirName = dirName.replaceAll(regex("[\\?<>:\"/\\\\|\\*]"), "");
-  }
+  dirName = dirName.replaceAll(regex("[\\?<>:\"/\\\\|\\*]"), "");
 
   try {
     mkdir(dirName);
@@ -99,9 +96,7 @@ int main(string[] args)
 
     try {
       auto fileName = trackName;
-      version (Windows) {
-        fileName = fileName.replaceAll(regex("[\\?<>:\"/\\\\|\\*]"), "");
-      }
+      fileName = fileName.replaceAll(regex("[\\?<>:\"/\\\\|\\*]"), "");
       auto pipes = pipeProcess([magic["ffmpeg"].str, "-i", "-", "-metadata", "title="~trackName, "-metadata", "artist="~trackArtist,
           "-metadata", "album="~title, "-metadata", "year="~year, "-metadata", "track="~num, "-metadata", "genre="~genre,
           "-metadata", "albumartist="~artist, "-metadata", "discnumber="~discNum, "-metadata", "tracktotal="~tracks.length.text,
@@ -144,9 +139,7 @@ int main(string[] args)
   if (choice == "y") {
     try {
       auto trackName = tracks[0]["title"].str;
-      version (Windows) {
-        trackName = trackName.replaceAll(regex("[\\?<>:\"/\\\\|\\*]"), "");
-      }
+      trackName = trackName.replaceAll(regex("[\\?<>:\"/\\\\|\\*]"), "");
 
       auto full = execute([magic["sox"].str, firstDisc~"/01 - "~trackName~".flac", "-n", "remix", "1", "spectrogram",
           "-x", "3000", "-y", "513", "-z", "120", "-w", "Kaiser", "-o", "SpecFull.png"]);
@@ -185,3 +178,5 @@ int main(string[] args)
 
   return 0;
 }
+
+// ex: set tabstop=2 expandtab:

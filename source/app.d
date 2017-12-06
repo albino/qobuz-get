@@ -68,7 +68,13 @@ int main(string[] args)
       num = track["track_number"].integer.text;
       discNum = track["media_number"].integer.text;
       trackName = track["title"].str;
-      trackArtist = track["performer"]["name"].str;
+      try {
+        trackArtist = track["performer"]["name"].str;
+      } catch (Exception e) {
+        // Qobuz doesn't return a "performer" for all albums, and I'm not sure about
+        // the best way to deal with this. Leaving blank for now.A
+        trackArtist = "";
+      }
       if (num.length < 2)
         num = "0"~num;
       writef(" [%s/%s] %s... ", discNum, num, trackName);

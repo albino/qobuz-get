@@ -91,3 +91,5 @@ string getArtUrl(string id) {
   string b = id[9..11];
   return "http://static.qobuz.com/images/covers/"~a~"/"~b~"/"~id~"_max.jpg";
 }
+
+// ex: set tabstop=2 expandtab:

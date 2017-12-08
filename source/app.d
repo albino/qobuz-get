@@ -103,10 +103,28 @@ int main(string[] args)
     try {
       auto fileName = trackName;
       fileName = fileName.replaceAll(regex("[\\?<>:\"/\\\\|\\*]"), "");
+	  auto relPath = discDir~"/"~num~" - "~fileName~".flac";
+	  
+	  version (Windows) {
+		// making up for NTFS/Windows inadequacy
+		// can't really do much better than truncating, sorry.
+		auto totalPath = getcwd() ~ relPath;
+		if (totalPath.length > 255) {
+			totalPath = totalPath[0..(totalPath.length - 4)];
+			relPath = relPath[0..(relPath.length - 4)];
+			while (totalPath.length > 250) {
+				totalPath = totalPath[0..(totalPath.length - 1)];
+				relPath = relPath[0..(relPath.length - 1)];
+			}
+			totalPath ~= ".flac";
+			relPath ~= ".flac";
+		}
+	  }
+	  
       auto pipes = pipeProcess([magic["ffmpeg"].str, "-i", "-", "-metadata", "title="~trackName, "-metadata", "artist="~trackArtist,
           "-metadata", "album="~title, "-metadata", "date="~year, "-metadata", "track="~num, "-metadata", "genre="~genre,
           "-metadata", "albumartist="~artist, "-metadata", "discnumber="~discNum, "-metadata", "tracktotal="~tracks.length.text,
-          "-metadata", "disctotal="~discs.text, discDir~"/"~num~" - "~fileName~".flac"],
+          "-metadata", "disctotal="~discs.text, relPath],
           Redirect.stdin | Redirect.stderr | Redirect.stdout);
       foreach (chunk; byChunkAsync(url, 1024)) {
         pipes.stdin.rawWrite(chunk);
@@ -116,6 +134,7 @@ int main(string[] args)
       wait(pipes.pid);
     } catch (Exception e) {
       writeln("Failed to download track! Check that ffmpeg is properly configured.");
+	  writeln(e.msg);
       return -8;
     }
     writeln("Done!");

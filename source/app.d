@@ -126,7 +126,7 @@ int main(string[] args)
           "-metadata", "albumartist="~artist, "-metadata", "discnumber="~discNum, "-metadata", "tracktotal="~tracks.length.text,
           "-metadata", "disctotal="~discs.text, relPath],
           Redirect.stdin | Redirect.stderr | Redirect.stdout);
-      foreach (chunk; byChunkAsync(url, 1024)) {
+      foreach (chunk; byChunk(url, 1024)) {
         pipes.stdin.rawWrite(chunk);
         pipes.stdin.flush;
       }

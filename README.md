@@ -36,6 +36,6 @@ Check that the values in magic.json are correct, then ask for help on IRC. Conne
 
  * Open http://play.qobuz.com in your browser and log in with your credentials.
  * Open the 'Network' tab of your browser's developer tools. (In Firefox, right click on page -> inspect element -> select the 'Network' tab)
- * Type any letter into the "Search" box at the top right of the page.
- * In the Network window, you should see a `GET` request beginning with `search`. Select it.
+ * Open the page for any album.
+ * In the Network window, you should see a `GET` request beginning with `get?album_id`. Select it.
  * You should see a list of headers on the right hand side (in Chrome, you need to click the "Headers" tab). Scroll down to the one which says `x-user-auth-token`. Select the content, and copy and paste it into magic.json. Done!

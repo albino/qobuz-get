@@ -1,9 +1,10 @@
 import std.stdio, std.regex, std.json, std.file, std.datetime, std.conv, std.process, std.net.curl, std.string;
 import qobuz.api;
+import etc.c.curl;
 
 int main(string[] args)
 {
-  string VERSION = "1.2";
+  string VERSION = "1.4";
 
   if (args.length != 2) {
     writefln("Usage: %s <album id or url>", args[0]);
@@ -126,10 +127,25 @@ int main(string[] args)
           "-metadata", "albumartist="~artist, "-metadata", "discnumber="~discNum, "-metadata", "tracktotal="~tracks.length.text,
           "-metadata", "disctotal="~discs.text, relPath],
           Redirect.stdin | Redirect.stderr | Redirect.stdout);
-      foreach (chunk; byChunkAsync(url, 1024)) {
-        pipes.stdin.rawWrite(chunk);
-        pipes.stdin.flush;
+
+      extern(C) static size_t writefunc(const ubyte* data, size_t size, size_t nmemb, void* p) {
+        auto pp = *(cast(ProcessPipes*) p);
+        pp.stdin.rawWrite(data[0..size*nmemb]);
+        pp.stdin.flush();
+        return size*nmemb;
       }
+      
+      CURL* curl;
+      CURLcode res;
+      curl = curl_easy_init();
+      curl_easy_setopt(curl, CurlOption.url, toStringz(url));
+      curl_easy_setopt(curl, CurlOption.followlocation, 1L);
+      curl_easy_setopt(curl, CurlOption.writefunction, cast(void*) &writefunc);
+      curl_easy_setopt(curl, CurlOption.writedata, cast(void*) &pipes);
+      res = curl_easy_perform(curl);
+      assert(res == CurlError.ok);
+      curl_easy_cleanup(curl);
+
       pipes.stdin.close;
       wait(pipes.pid);
     } catch (Exception e) {
